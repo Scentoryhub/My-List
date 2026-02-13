@@ -19,7 +19,6 @@
         --accent-color: #000;
         --bg-color: #f8f8f8;
         --font-main: "Helvetica Neue", Helvetica, Arial, sans-serif;
-        /* Tag Colors */
         --tag-hot: #d9534f;
         --tag-new: #007bff;
         --tag-sale: #28a745;
@@ -1176,6 +1175,7 @@
           cartItems.push({
             name: id,
             caption: captionStr,
+            img: product.img, // CRITICAL FIX: Save Image to Cart Data
             brand: product.brand,
             ml: product.ml,
             quantity: 1,
