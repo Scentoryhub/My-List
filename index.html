@@ -6,85 +6,112 @@
       name="viewport"
       content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
     />
-    <title>Catalog Viewer</title>
+    <title>Catalog</title>
     <link rel="icon" type="image/png" href="icon/32.png" />
     <style>
-      /* ================= GLOBAL & LAYOUT ================= */
+      /* ================= 1. Global Config (保留原UI) ================= */
       :root {
         --header-height: 60px;
-        --sidebar-width: 280px;
-        --accent-color: #000; /* Black for neutrality */
-        --bg-color: #ffffff;
+        --total-top-spacing: 60px;
+        --sidebar-width: 300px;
+        --accent-color: #000; /* 改为黑色，显得更专业/中性 */
+        --bg-color: #f8f8f8;
+        --font-main: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        --tag-hot: #d9534f;
+        --tag-new: #007bff;
+        --tag-sale: #28a745;
       }
+
+      /* 核心修改：强制隐藏价格相关元素 */
+      .price-display,
+      .discount-badge,
+      .old-price,
+      #wholesale-banner,
+      .trust-section a {
+        display: none !important;
+      }
+      /* 隐藏 Header 右侧的 Track 按钮 */
+      .header-right {
+        display: none !important;
+      }
+
       * {
         box-sizing: border-box;
         -webkit-tap-highlight-color: transparent;
       }
       body {
         margin: 0;
-        padding: 0;
-        padding-top: var(--header-height);
-        padding-bottom: 90px;
-        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        padding-top: var(--total-top-spacing);
+        padding-bottom: 110px;
+        font-family: var(--font-main);
         background: var(--bg-color);
         color: #333;
-        -webkit-font-smoothing: antialiased;
       }
       a {
         text-decoration: none;
         color: inherit;
+        cursor: pointer;
       }
       button {
         outline: none;
+        font-family: inherit;
         border: none;
         background: none;
-        font-family: inherit;
+        padding: 0;
       }
 
-      /* ================= HEADER ================= */
+      /* HEADER */
       .site-header {
         position: fixed;
         top: 0;
         left: 0;
         width: 100%;
         height: var(--header-height);
-        background-color: #fff;
-        border-bottom: 1px solid #f0f0f0;
+        background-color: #000;
+        color: #fff;
         display: flex;
         align-items: center;
-        padding: 0 15px;
+        padding: 0 10px;
         z-index: 1000;
-        justify-content: space-between;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        gap: 10px;
       }
       .header-left {
         display: flex;
         align-items: center;
-        font-size: 1.2rem;
+        gap: 5px;
         cursor: pointer;
+        flex-shrink: 0;
+      }
+      .hamburger-icon {
+        font-size: 1.6rem;
+        line-height: 1;
       }
       .header-center {
-        flex: 1;
-        margin: 0 15px;
+        flex-grow: 1;
+        display: flex;
+        justify-content: flex-end;
       }
       .header-search-input {
         width: 100%;
-        background: #f5f5f5;
-        border: none;
-        padding: 10px 15px;
-        border-radius: 20px;
+        background: #333;
+        border: 1px solid #444;
+        color: #fff;
+        padding: 8px 12px;
+        border-radius: 4px;
         font-size: 0.9rem;
         outline: none;
       }
 
-      /* ================= SIDEBAR ================= */
+      /* SIDEBAR */
       .sidebar-overlay {
         position: fixed;
         inset: 0;
-        background: rgba(0, 0, 0, 0.5);
+        background: rgba(0, 0, 0, 0.6);
         z-index: 2000;
         opacity: 0;
         visibility: hidden;
-        transition: 0.3s;
+        transition: all 0.3s;
       }
       .sidebar-overlay.active {
         opacity: 1;
@@ -95,177 +122,232 @@
         top: 0;
         left: 0;
         bottom: 0;
-        width: var(--sidebar-width);
+        width: 85%;
+        max-width: var(--sidebar-width);
         background: #fff;
         z-index: 2001;
         transform: translateX(-100%);
-        transition: 0.3s;
-        padding: 20px;
-        overflow-y: auto;
+        transition: transform 0.3s;
+        display: flex;
+        flex-direction: column;
       }
       .sidebar.active {
         transform: translateX(0);
       }
+      .sidebar-header {
+        display: flex;
+        border-bottom: 2px solid #ddd;
+      }
+      .sidebar-tab {
+        flex: 1;
+        text-align: center;
+        padding: 15px 0;
+        font-weight: 700;
+        background: #f9f9f9;
+      }
+      .sidebar-tab.active {
+        background: #fff;
+        color: #000;
+        border-bottom: 2px solid #000;
+      }
+      .sidebar-content {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
+      }
       .menu-link {
         display: block;
-        padding: 12px 0;
-        border-bottom: 1px solid #eee;
+        padding: 15px 0;
         font-weight: 600;
+        border-bottom: 1px solid #eee;
+        text-transform: uppercase;
       }
       .brand-item {
-        padding: 10px 5px;
+        padding: 12px 5px;
+        font-size: 0.95rem;
         color: #555;
         cursor: pointer;
+        border-bottom: 1px solid #f0f0f0;
       }
 
-      /* ================= LIST/GRID LAYOUTS ================= */
-      /* Horizontal Scroll (Home) */
-      .brand-section {
-        margin-bottom: 20px;
-        padding: 10px 0;
+      /* BOTTOM NAV (Capsule) */
+      .bottom-nav-bar {
+        position: fixed;
+        bottom: 25px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 92%;
+        max-width: 500px;
+        height: 60px;
+        background: #fff;
+        z-index: 980;
+        display: flex;
+        align-items: stretch;
+        justify-content: space-between;
+        border-radius: 50px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        border: 1px solid rgba(0, 0, 0, 0.03);
+        overflow: hidden;
       }
-      .brand-title {
-        padding: 0 15px;
-        font-size: 1.1rem;
-        font-weight: 800;
+      .nav-left {
+        width: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        cursor: pointer;
+        background: #fff;
+      }
+      .nav-badge {
+        background-color: #000;
+        color: #fff;
+        font-size: 0.75rem;
+        font-weight: 700;
+        min-width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .nav-right {
+        width: 50%;
+      }
+      .checkout-pill-btn {
+        width: 100%;
+        height: 100%;
+        background-color: #000;
+        color: #fff;
+        font-size: 1rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
         text-transform: uppercase;
-        margin-bottom: 10px;
+      }
+
+      /* CARDS & LAYOUT */
+      .brand-section {
+        margin-bottom: 15px;
+        background: #fff;
+        padding: 15px 0 20px 0;
+        border-top: 1px solid #eee;
+        border-bottom: 1px solid #eee;
+      }
+      .brand-header {
         display: flex;
         justify-content: space-between;
+        padding: 0 15px 10px;
       }
-      .brand-see-all {
-        font-size: 0.8rem;
-        color: #888;
-        text-decoration: underline;
-        font-weight: normal;
-        cursor: pointer;
+      .brand-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        text-transform: uppercase;
       }
-
       .scroll-wrapper {
         display: flex;
         overflow-x: auto;
-        gap: 10px;
-        padding: 0 15px 15px 15px;
+        gap: 12px;
+        padding: 5px 12px 15px;
         scrollbar-width: none;
-        -webkit-overflow-scrolling: touch;
       }
-      .scroll-wrapper::-webkit-scrollbar {
-        display: none;
-      }
-
-      .product-card {
-        flex: 0 0 140px;
+      .scroll-card {
+        flex: 0 0 160px;
         display: flex;
         flex-direction: column;
         cursor: pointer;
       }
       .img-wrapper {
         width: 100%;
-        height: 140px;
-        border-radius: 8px;
+        height: 160px;
+        border-radius: 6px;
         overflow: hidden;
-        background: #f9f9f9;
-        position: relative;
         margin-bottom: 8px;
+        position: relative;
+        background: #f4f4f4;
       }
       .img-wrapper img {
         width: 100%;
         height: 100%;
-        object-fit: contain;
+        object-fit: cover;
       }
-      .card-title {
-        font-size: 0.85rem;
-        font-weight: 600;
-        line-height: 1.2;
-        height: 2.4em;
-        overflow: hidden;
-        margin-bottom: 4px;
-      }
-      .card-brand {
-        font-size: 0.75rem;
-        color: #888;
-      }
-
-      /* Grid View */
-      #grid-view {
-        display: none;
-        padding: 15px;
-      }
-      .gallery {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 15px;
-      }
-      @media (min-width: 600px) {
-        .gallery {
-          grid-template-columns: repeat(4, 1fr);
-        }
-      }
-      .grid-item {
-        background: #fff;
-      }
-
-      /* ================= UI ELEMENTS ================= */
-      /* Add Button Styles */
-      .btn-add {
-        background: #000;
-        color: #fff;
-        width: 100%;
-        padding: 8px 0;
-        font-size: 0.8rem;
-        font-weight: 700;
-        border-radius: 4px;
-        margin-top: 5px;
-        cursor: pointer;
-      }
-      .qty-control {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        border: 1px solid #000;
-        border-radius: 4px;
-        height: 32px;
-        margin-top: 5px;
-      }
-      .qty-control div {
-        width: 30px;
-        text-align: center;
-        cursor: pointer;
-        font-weight: bold;
-      }
-      .qty-val {
-        flex: 1;
-        text-align: center;
-        font-size: 0.9rem;
-      }
-
-      /* Tags */
-      .tag {
+      .badge-tag {
         position: absolute;
         top: 0;
         left: 0;
-        padding: 2px 6px;
-        font-size: 0.65rem;
         color: #fff;
+        padding: 3px 6px;
+        font-size: 0.65rem;
         font-weight: bold;
       }
-      .tag.hot {
-        background: #d9534f;
+      .badge-hot {
+        background: var(--tag-hot);
       }
-      .tag.new {
-        background: #007bff;
+      .badge-new {
+        background: var(--tag-new);
+      }
+      .scroll-card-title {
+        font-size: 0.85rem;
+        height: 2.4em;
+        overflow: hidden;
+        line-height: 1.2;
+        font-weight: 500;
+        text-transform: uppercase;
+      }
+      .scroll-card-sub {
+        font-size: 0.75rem;
+        color: #888;
+        margin-top: 2px;
       }
 
-      /* ================= MODAL ================= */
+      /* BUTTONS */
+      .action-btn-black {
+        background: #000;
+        color: #fff;
+        padding: 10px 0;
+        width: 100%;
+        font-size: 0.8rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+      .action-qty-box {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border: 2px solid #000;
+        border-radius: 6px;
+        height: 38px;
+      }
+      .qty-btn-rect {
+        width: 35px;
+        height: 100%;
+        font-size: 1.2rem;
+        background: #000;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+      }
+      .qty-val-rect {
+        flex: 1;
+        text-align: center;
+        font-weight: 700;
+      }
+
+      /* MODAL */
       .modal {
         display: none;
         position: fixed;
         inset: 0;
-        background: rgba(0, 0, 0, 0.8);
+        background: rgba(0, 0, 0, 0.85);
         z-index: 3000;
         align-items: center;
         justify-content: center;
-        padding: 20px;
+        padding: 15px;
       }
       .modal.open {
         display: flex;
@@ -276,242 +358,237 @@
         max-width: 400px;
         border-radius: 12px;
         overflow: hidden;
+        padding-bottom: 15px;
         position: relative;
-        padding-bottom: 20px;
       }
       .modal-close {
         position: absolute;
         top: 10px;
         right: 10px;
-        font-size: 1.5rem;
-        width: 30px;
-        height: 30px;
-        background: #eee;
-        border-radius: 50%;
-        text-align: center;
-        line-height: 28px;
+        font-size: 2rem;
         cursor: pointer;
         z-index: 10;
+        width: 40px;
+        height: 40px;
+        text-align: center;
+        line-height: 40px;
       }
-      .modal-img-area {
+      .modal-img {
         width: 100%;
         height: 300px;
+        object-fit: contain;
         background: #fff;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-      .modal-img-area img {
-        max-width: 80%;
-        max-height: 90%;
       }
       .modal-info {
         padding: 15px;
         text-align: center;
       }
+      .stock-status {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        margin: 10px 0;
+      }
+      .stock-green {
+        background: #e8f5e9;
+        color: #2e7d32;
+      }
+      .stock-red {
+        background: #ffebee;
+        color: #c62828;
+      }
 
-      /* ================= BOTTOM BAR ================= */
-      .bottom-bar {
-        position: fixed;
-        bottom: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 90%;
-        max-width: 400px;
-        height: 60px;
-        background: #222;
-        color: #fff;
-        border-radius: 30px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0 6px 0 20px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-        z-index: 2500;
-        cursor: pointer;
+      /* GRID VIEW */
+      #grid-view {
+        display: none;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px 10px;
       }
-      .bar-info {
-        font-size: 0.95rem;
-        font-weight: 600;
+      .gallery {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
       }
-      .bar-btn {
+      .item {
         background: #fff;
-        color: #000;
-        height: 48px;
-        padding: 0 25px;
-        border-radius: 24px;
-        font-weight: 700;
-        font-size: 0.9rem;
-        display: flex;
-        align-items: center;
-      }
-
-      /* Skeleton */
-      .skeleton {
-        background: #f0f0f0;
-        animation: pulse 1.5s infinite;
-      }
-      @keyframes pulse {
-        0% {
-          opacity: 1;
-        }
-        50% {
-          opacity: 0.6;
-        }
-        100% {
-          opacity: 1;
-        }
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid #eee;
       }
 
       /* Toast */
       #toast {
-        position: fixed;
-        bottom: 90px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: rgba(0, 0, 0, 0.8);
+        visibility: hidden;
+        min-width: 200px;
+        background-color: #333;
         color: #fff;
-        padding: 10px 20px;
-        border-radius: 20px;
+        text-align: center;
+        border-radius: 30px;
+        padding: 12px;
+        position: fixed;
+        z-index: 4000;
+        left: 50%;
+        bottom: 100px;
+        transform: translateX(-50%);
+        font-size: 0.9rem;
         opacity: 0;
         transition: 0.3s;
-        pointer-events: none;
-        z-index: 4000;
-        font-size: 0.9rem;
       }
       #toast.show {
+        visibility: visible;
         opacity: 1;
+        bottom: 110px;
       }
     </style>
   </head>
   <body>
     <header class="site-header">
-      <div class="header-left" id="menu-trigger">☰</div>
+      <div class="header-left" id="menu-trigger">
+        <span class="hamburger-icon">☰</span>
+      </div>
       <div class="header-center">
         <input
           type="text"
-          id="search-input"
+          id="global-search-input"
           class="header-search-input"
-          placeholder="Search catalog..."
+          placeholder="Search ID or Name..."
         />
-      </div>
-      <div
-        class="header-right"
-        onclick="window.location.href = 'cart.html'"
-        style="position: relative; width: 30px"
-      >
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="black"
-          stroke-width="2"
-          width="24"
-          height="24"
-        >
-          <path
-            d="M6 6h15l-1.68 13.39a2 2 0 0 1-2 1.61H6a2 2 0 0 1-2-1.61L2.34 6H1V4h4l1 2z"
-          ></path>
-        </svg>
       </div>
     </header>
 
     <div class="sidebar-overlay" id="sidebar-overlay"></div>
     <div class="sidebar" id="sidebar">
-      <div style="font-weight: 900; font-size: 1.2rem; margin-bottom: 20px">
-        CATEGORIES
+      <div class="sidebar-header">
+        <div class="sidebar-tab active">CATALOG</div>
       </div>
-      <nav>
-        <a class="menu-link" onclick="loadView('Home')">Home</a>
-        <a class="menu-link" onclick="loadView('All')">Full Catalog</a>
-        <a class="menu-link" onclick="loadView('Gender:Women')">For Her</a>
-        <a class="menu-link" onclick="loadView('Gender:Men')">For Him</a>
-        <a class="menu-link" onclick="loadView('Gender:Unisex')">Unisex</a>
-        <a class="menu-link" onclick="loadView('Set')">Gift Sets</a>
-      </nav>
-      <div
-        style="
-          margin-top: 20px;
-          font-weight: 700;
-          color: #999;
-          font-size: 0.85rem;
-        "
-      >
-        BRANDS
+      <div class="sidebar-content">
+        <nav>
+          <a class="menu-link" onclick="handleMenuClick('Home')">Home</a>
+          <a class="menu-link" onclick="handleMenuClick('All')">Full Catalog</a>
+          <a
+            class="menu-link"
+            onclick="handleMenuClick('Gender:Women')"
+            style="color: #c2185b"
+            >For Her 👩</a
+          >
+          <a
+            class="menu-link"
+            onclick="handleMenuClick('Gender:Men')"
+            style="color: #1565c0"
+            >For Him 👨</a
+          >
+          <a class="menu-link" onclick="handleMenuClick('Gender:Unisex')"
+            >Unisex ⚤</a
+          >
+          <a class="menu-link" onclick="handleMenuClick('Set')">Gift Sets 🎁</a>
+          <a class="menu-link" onclick="handleMenuClick('BestSellers')"
+            >Best Sellers 🔥</a
+          >
+          <a class="menu-link" onclick="handleMenuClick('New')"
+            >New Arrivals 🆕</a
+          >
+          <a class="menu-link" href="cart.html">My Selection</a>
+        </nav>
+        <div style="font-weight: 700; margin: 20px 0 10px; color: #999">
+          BRANDS
+        </div>
+        <div class="brand-list" id="brand-list-container"></div>
       </div>
-      <div id="sidebar-brands"></div>
     </div>
 
-    <div id="home-view"></div>
+    <div id="home-view">
+      <div id="home-content">
+        <div style="text-align: center; padding: 40px">Loading Catalog...</div>
+      </div>
+    </div>
 
     <div id="grid-view">
       <div
         style="
           display: flex;
           justify-content: space-between;
-          align-items: center;
           margin-bottom: 15px;
         "
       >
-        <h2 id="grid-title" style="margin: 0; font-size: 1.2rem">Results</h2>
-        <span
-          onclick="loadView('Home')"
-          style="font-size: 0.9rem; text-decoration: underline"
-          >Back</span
+        <div style="font-size: 1.2rem; font-weight: 700" id="grid-title">
+          Results
+        </div>
+        <div
+          onclick="handleMenuClick('Home')"
+          style="text-decoration: underline"
         >
+          Back
+        </div>
       </div>
       <div class="gallery" id="gallery"></div>
-      <div id="pagination" style="margin-top: 20px; text-align: center"></div>
-    </div>
-
-    <div
-      class="bottom-bar"
-      id="bottom-bar"
-      style="display: none"
-      onclick="window.location.href = 'cart.html'"
-    >
-      <div class="bar-info"><span id="bar-count">0</span> Items Selected</div>
-      <button class="bar-btn">VIEW LIST &rarr;</button>
+      <div
+        id="pagination-controls"
+        style="margin-top: 20px; text-align: center"
+      ></div>
     </div>
 
     <div id="modal" class="modal">
       <div class="modal-content">
         <div class="modal-close">&times;</div>
-        <div class="modal-img-area">
-          <img id="modal-img" src="" alt="" />
-        </div>
+        <img id="modal-img" class="modal-img" src="" />
         <div class="modal-info">
           <div
+            id="modal-sub"
             style="
-              font-size: 0.8rem;
               color: #888;
-              font-weight: bold;
+              font-size: 0.85rem;
               letter-spacing: 1px;
+              text-transform: uppercase;
             "
-            id="modal-brand"
-          >
-            BRAND
-          </div>
-          <h3 id="modal-title" style="margin: 5px 0 10px 0; font-size: 1.2rem">
-            Product Name
-          </h3>
+          ></div>
+          <h3
+            id="modal-title"
+            style="margin: 5px 0 10px; font-size: 1.2rem"
+          ></h3>
           <div
-            id="modal-meta"
-            style="font-size: 0.9rem; color: #666; margin-bottom: 15px"
+            id="modal-sku"
+            style="
+              font-family: monospace;
+              color: #555;
+              background: #f0f0f0;
+              display: inline-block;
+              padding: 2px 6px;
+              border-radius: 4px;
+              font-size: 0.8rem;
+            "
           ></div>
           <div
             id="modal-notes"
             style="
-              font-size: 0.85rem;
+              font-size: 0.9rem;
+              color: #666;
+              margin: 10px 0;
               font-style: italic;
-              background: #f9f9f9;
-              padding: 8px;
-              border-radius: 6px;
-              margin-bottom: 15px;
             "
           ></div>
-          <div id="modal-stock-msg"></div>
+          <div id="modal-stock"></div>
           <div id="modal-action-area" style="margin-top: 15px"></div>
         </div>
+      </div>
+    </div>
+
+    <div class="bottom-nav-bar">
+      <div class="nav-left" onclick="window.location.href = 'cart.html'">
+        <span style="font-weight: bold">SELECTION</span>
+        <div id="bottom-bar-badge" class="nav-badge" style="display: none">
+          0
+        </div>
+      </div>
+      <div class="nav-right">
+        <button
+          class="checkout-pill-btn"
+          onclick="window.location.href = 'cart.html'"
+        >
+          VIEW LIST &rarr;
+        </button>
       </div>
     </div>
 
@@ -519,12 +596,13 @@
 
     <script src="db.js"></script>
     <script>
-      // ================= CONFIG =================
+      // ================= CONFIG & CONSTANTS =================
       const FEATURED_BRANDS = [
         "Creed",
         "Dior",
         "Chanel",
         "Tom Ford",
+        "Yves Saint Laurent",
         "Louis Vuitton",
         "Gucci",
         "Maison Francis Kurkdjian",
@@ -536,279 +614,192 @@
       ];
       let cartItems = [];
       let viewMode = "home";
+      let currentModalProductId = null;
       let currentGridData = [];
       let currentPage = 1;
 
       // ================= INIT =================
       document.addEventListener("DOMContentLoaded", () => {
-        setupUI();
         loadCart();
-        // db.js calls runPageLogic when done
+        setupMenu();
+        renderSidebarBrands();
+        setupSearch();
+        setupModalClose();
       });
 
-      function runPageLogic() {
-        renderSidebar();
-        renderHome();
-        checkUrlForSku(); // <--- Deep Linking Logic
-      }
-
-      // ================= DEEP LINKING (SKU) =================
-      function checkUrlForSku() {
-        const params = new URLSearchParams(window.location.search);
-        const sku = params.get("sku");
+      // ================= URL SKU LOGIC (关键新增) =================
+      window.checkSkuParam = function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        const sku = urlParams.get("sku");
         if (sku && window.perfumeDB) {
-          // Try to find by Exact ID or Name starts with ID
-          const item = window.perfumeDB.find(
-            (p) => p.id == sku || p.name.startsWith(sku),
+          // 查找 ID 匹配 或 名称开头匹配
+          const product = window.perfumeDB.find(
+            (p) => p.id == sku || (p.id + "-" + p.name).startsWith(sku),
           );
-          if (item) {
-            openModal(item);
-            // Optional: Clean URL so reload doesn't keep opening it?
-            // window.history.replaceState({}, document.title, window.location.pathname);
+          if (product) {
+            openModal(product);
           }
         }
-      }
+      };
 
-      // ================= RENDERING =================
+      // ================= RENDER LOGIC =================
       function renderHome() {
-        const container = document.getElementById("home-view");
+        const db = (window.perfumeDB || []).filter(
+          (p) => parseInt(p.stock) > 0,
+        );
+        const container = document.getElementById("home-content");
         container.innerHTML = "";
 
-        const db = window.perfumeDB.filter((p) => parseInt(p.stock) > 0); // Hide OOS
+        // Helper to create scroll sections
+        const createSection = (title, items, filterKey) => {
+          const section = document.createElement("div");
+          section.className = "brand-section";
+          section.id = "brand-" + (filterKey || title).replace(/\s+/g, "");
 
-        // 1. Hot Items
-        const hot = db.filter((p) => p.top == 1).slice(0, 10);
-        if (hot.length)
-          container.appendChild(createSection("Trending Now", hot));
+          section.innerHTML = `
+            <div class="brand-header">
+              <div class="brand-title">${title}</div>
+              <div style="font-size:0.8rem; text-decoration:underline;" onclick="switchToGrid('${filterKey || "All"}')">See All</div>
+            </div>
+          `;
 
-        // 2. Featured Brands
+          const wrapper = document.createElement("div");
+          wrapper.className = "scroll-wrapper";
+
+          items.slice(0, 15).forEach((p) => {
+            const card = document.createElement("div");
+            card.className = "scroll-card";
+            card.onclick = (e) => {
+              if (
+                e.target.closest(".action-btn-black") ||
+                e.target.closest(".qty-btn-rect")
+              )
+                return;
+              openModal(p);
+            };
+
+            const webp = p.img.replace(/\.(jpg|png|jpeg)$/i, ".webp");
+            let badge = "";
+            if (p.top == 1)
+              badge = `<div class="badge-tag badge-hot">HOT</div>`;
+            else if (p.new == 1)
+              badge = `<div class="badge-tag badge-new">NEW</div>`;
+
+            card.innerHTML = `
+              <div class="img-wrapper">
+                <picture><source srcset="${webp}"><img src="${p.img}" loading="lazy"></picture>
+                ${badge}
+              </div>
+              <div class="scroll-card-title">${p.id} ${p.name}</div>
+              <div class="scroll-card-sub">${p.brand}</div>
+              <div style="margin-top:5px;" id="btn-home-${p.id}">${getButtonHtml(p.id)}</div>
+            `;
+            wrapper.appendChild(card);
+          });
+          section.appendChild(wrapper);
+          container.appendChild(section);
+        };
+
+        // 1. Render Categories (保持原有逻辑)
+        const best = db.filter((p) => p.top == 1);
+        if (best.length) createSection("🔥 Best Sellers", best, "BestSellers");
+
+        const nevv = db.filter((p) => p.new == 1);
+        if (nevv.length) createSection("🆕 New Arrivals", nevv, "New");
+
         FEATURED_BRANDS.forEach((brand) => {
           const items = db.filter((p) =>
             p.brand.toLowerCase().includes(brand.toLowerCase()),
           );
-          if (items.length >= 4) {
-            container.appendChild(
-              createSection(brand, items.slice(0, 15), brand),
+          if (items.length >= 3)
+            createSection(
+              brand === "Yves Saint Laurent" ? "YSL" : brand.toUpperCase(),
+              items,
+              brand,
             );
-          }
         });
       }
 
-      function createSection(title, items, linkKey) {
-        const sec = document.createElement("div");
-        sec.className = "brand-section";
-        sec.innerHTML = `
-          <div class="brand-title">
-             <span>${title}</span>
-             <span class="brand-see-all" onclick="loadView('${linkKey || "All"}')">See All</span>
-          </div>
-        `;
-        const wrapper = document.createElement("div");
-        wrapper.className = "scroll-wrapper";
+      function renderGridPage() {
+        const gallery = document.getElementById("gallery");
+        gallery.innerHTML = "";
+
+        // Pagination logic... (Simplified for brevity, same as before)
+        const start = (currentPage - 1) * 20;
+        const items = currentGridData.slice(start, start + 20);
 
         items.forEach((p) => {
-          const card = document.createElement("div");
-          card.className = "product-card";
-          card.onclick = (e) => {
-            if (e.target.closest("button") || e.target.closest(".qty-control"))
-              return;
-            openModal(p);
-          };
-
-          // Generate Action Button
-          const btnHtml = getButtonHtml(p.id);
+          const div = document.createElement("div");
+          div.className = "item";
           const webp = p.img.replace(/\.(jpg|png)$/i, ".webp");
 
-          let tag = "";
-          if (p.top == 1) tag = '<div class="tag hot">HOT</div>';
-          else if (p.new == 1) tag = '<div class="tag new">NEW</div>';
-
-          card.innerHTML = `
-             <div class="img-wrapper">
-                <picture><source srcset="${webp}"><img src="${p.img}" loading="lazy"></picture>
-                ${tag}
-             </div>
-             <div class="card-title">${p.caption || p.id + " " + p.name}</div>
-             <div class="card-brand">${p.brand} ${p.ml ? "· " + p.ml : ""}</div>
-             <div id="btn-${p.id}">${btnHtml}</div>
-           `;
-          wrapper.appendChild(card);
-        });
-        sec.appendChild(wrapper);
-        return sec;
-      }
-
-      function loadView(key) {
-        document.getElementById("sidebar").classList.remove("active");
-        document.getElementById("sidebar-overlay").classList.remove("active");
-
-        if (key === "Home") {
-          document.getElementById("home-view").style.display = "block";
-          document.getElementById("grid-view").style.display = "none";
-          window.scrollTo(0, 0);
-          return;
-        }
-
-        // Switch to Grid
-        document.getElementById("home-view").style.display = "none";
-        document.getElementById("grid-view").style.display = "block";
-        window.scrollTo(0, 0);
-
-        let data = window.perfumeDB.filter((p) => parseInt(p.stock) > 0);
-        let title = key;
-
-        if (key === "All") {
-          title = "Full Catalog";
-        } else if (key.startsWith("Gender:")) {
-          const g = key.split(":")[1];
-          data = data.filter(
-            (p) => p.gender && p.gender.toLowerCase().includes(g.toLowerCase()),
-          );
-          title = g + "'s Selection";
-        } else if (key === "Set") {
-          data = data.filter((p) => p.name.toUpperCase().includes("SET"));
-          title = "Gift Sets";
-        } else if (key.startsWith("Search:")) {
-          const term = key.split(":")[1].toLowerCase();
-          data = data.filter(
-            (p) =>
-              p.name.toLowerCase().includes(term) ||
-              p.brand.toLowerCase().includes(term) ||
-              p.id.toString().includes(term),
-          );
-          title = `Search: "${term}"`;
-        } else {
-          // Brand
-          data = data.filter((p) =>
-            p.brand.toLowerCase().includes(key.toLowerCase()),
-          );
-        }
-
-        currentGridData = data;
-        currentPage = 1;
-        document.getElementById("grid-title").textContent = title;
-        renderGrid();
-      }
-
-      function renderGrid() {
-        const gal = document.getElementById("gallery");
-        gal.innerHTML = "";
-        const size = 20;
-        const start = (currentPage - 1) * size;
-        const pageItems = currentGridData.slice(start, start + size);
-
-        if (pageItems.length === 0) {
-          gal.innerHTML =
-            "<div style='grid-column:1/-1;text-align:center;padding:40px;color:#999'>No items found</div>";
-          return;
-        }
-
-        pageItems.forEach((p) => {
-          const div = document.createElement("div");
-          div.className = "grid-item";
           div.innerHTML = `
-              <div class="img-wrapper" style="height:160px" onclick="openModalById('${p.id}')">
-                <img src="${p.img}" loading="lazy" style="object-fit:contain">
-              </div>
-              <div style="padding:5px;">
-                 <div style="font-size:0.8rem;height:2.4em;overflow:hidden;font-weight:600;">${p.name}</div>
-                 <div style="font-size:0.75rem;color:#777;">${p.brand}</div>
-                 <div id="grid-btn-${p.id}">${getButtonHtml(p.id)}</div>
-              </div>
-           `;
-          gal.appendChild(div);
+            <div style="height:180px; position:relative; overflow:hidden;" onclick="openModalById('${p.id}')">
+               <picture><source srcset="${webp}"><img src="${p.img}" style="width:100%; height:100%; object-fit:cover;"></picture>
+            </div>
+            <div style="padding:10px;">
+               <div style="font-weight:bold; font-size:0.9rem; height:2.4em; overflow:hidden;">${p.id} ${p.name}</div>
+               <div style="color:#888; font-size:0.8rem; margin-bottom:5px;">${p.brand}</div>
+               <div id="btn-grid-${p.id}">${getButtonHtml(p.id)}</div>
+            </div>
+          `;
+          gallery.appendChild(div);
         });
 
-        // Pagination (Simple)
-        const totalPages = Math.ceil(currentGridData.length / size);
-        const pagDiv = document.getElementById("pagination");
-        pagDiv.innerHTML = "";
+        // Simple Pagination Controls
+        const totalPages = Math.ceil(currentGridData.length / 20);
+        const controls = document.getElementById("pagination-controls");
         if (totalPages > 1) {
-          if (currentPage > 1)
-            pagDiv.innerHTML += `<button onclick="currentPage--;renderGrid()" style="padding:10px;background:#eee;margin:5px;">Prev</button>`;
-          pagDiv.innerHTML += `<span style="margin:0 10px;">Page ${currentPage} / ${totalPages}</span>`;
-          if (currentPage < totalPages)
-            pagDiv.innerHTML += `<button onclick="currentPage++;renderGrid()" style="padding:10px;background:#eee;margin:5px;">Next</button>`;
+          controls.innerHTML = `
+            <button onclick="changePage(-1)" style="padding:5px 10px; background:#ddd; margin-right:10px;">Prev</button>
+            <span>Page ${currentPage} / ${totalPages}</span>
+            <button onclick="changePage(1)" style="padding:5px 10px; background:#ddd; margin-left:10px;">Next</button>
+          `;
+        } else {
+          controls.innerHTML = "";
         }
       }
 
-      // ================= ACTIONS =================
-      window.updateQty = (id, change) => {
-        const p = window.perfumeDB.find((i) => i.id == id);
-        if (!p) return;
-
-        let item = cartItems.find((c) => c.name === id);
-        if (!item) {
-          if (change > 0) {
-            cartItems.push({
-              name: id,
-              caption: `${id} - ${p.name}`,
-              img: p.img,
-              brand: p.brand,
-              quantity: 1,
-            });
-            showToast("Added to List");
-          }
-        } else {
-          item.quantity += change;
-          if (item.quantity <= 0)
-            cartItems = cartItems.filter((c) => c.name !== id);
+      window.changePage = (delta) => {
+        const total = Math.ceil(currentGridData.length / 20);
+        const next = currentPage + delta;
+        if (next >= 1 && next <= total) {
+          currentPage = next;
+          renderGridPage();
+          window.scrollTo(0, 0);
         }
-
-        saveCart();
-        refreshButtons(id);
       };
 
-      function refreshButtons(id) {
-        const html = getButtonHtml(id);
-        const els = document.querySelectorAll(`[id*='btn-${id}']`); // Matches home, grid, modal
-        els.forEach((el) => (el.innerHTML = html));
-        if (document.getElementById("modal").classList.contains("open")) {
-          document.getElementById("modal-action-area").innerHTML = html;
-        }
-      }
-
-      function getButtonHtml(id) {
-        const item = cartItems.find((c) => c.name == id);
-        if (!item)
-          return `<button class="btn-add" onclick="updateQty('${id}', 1)">ADD TO LIST</button>`;
-        return `
-           <div class="qty-control">
-              <div onclick="updateQty('${id}', -1)">-</div>
-              <div class="qty-val">${item.quantity}</div>
-              <div onclick="updateQty('${id}', 1)">+</div>
-           </div>
-         `;
-      }
-
+      // ================= MODAL & ACTIONS =================
       window.openModal = (p) => {
-        const m = document.getElementById("modal");
+        currentModalProductId = p.id;
         document.getElementById("modal-img").src = p.img;
-        document.getElementById("modal-brand").textContent = p.brand;
-        document.getElementById("modal-title").textContent =
-          p.id + " - " + p.name;
-        document.getElementById("modal-meta").innerHTML =
-          `${p.gender || "Unisex"} · ${p.ml || "Standard Size"}`;
+        document.getElementById("modal-title").textContent = p.name;
+        document.getElementById("modal-sub").textContent =
+          p.brand + " · " + (p.gender || "Unisex");
+        document.getElementById("modal-sku").textContent = "SKU: " + p.id;
+        document.getElementById("modal-notes").textContent = p.Notes || "";
 
-        const notes = p.Notes || p.notes || "";
-        const nEl = document.getElementById("modal-notes");
-        if (notes) {
-          nEl.style.display = "block";
-          nEl.textContent = "Notes: " + notes;
-        } else nEl.style.display = "none";
+        // Stock Logic (No Price)
+        const stockEl = document.getElementById("modal-stock");
+        if (p.inventory < 10) {
+          stockEl.innerHTML = `<div class="stock-status stock-red">Low Stock: ${p.inventory} Left</div>`;
+        } else {
+          stockEl.innerHTML = `<div class="stock-status stock-green">In Stock</div>`;
+        }
 
-        // Stock Logic (No price)
-        const stock = parseInt(p.inventory || p.stock);
-        const sEl = document.getElementById("modal-stock-msg");
-        if (stock < 10)
-          sEl.innerHTML = `<span style="color:#d9534f;font-size:0.8rem;font-weight:bold;">🔥 Low Stock: Only ${stock} left</span>`;
-        else
-          sEl.innerHTML = `<span style="color:#28a745;font-size:0.8rem;font-weight:bold;">✅ In Stock</span>`;
+        updateButtons(p.id);
+        document.getElementById("modal").classList.add("open");
 
-        document.getElementById("modal-action-area").innerHTML = getButtonHtml(
-          p.id,
-        );
-        m.classList.add("open");
+        // Update URL to include SKU without reloading (Deep Link sharing)
+        const newUrl =
+          window.location.protocol +
+          "//" +
+          window.location.host +
+          window.location.pathname +
+          "?sku=" +
+          p.id;
+        window.history.pushState({ path: newUrl }, "", newUrl);
       };
 
       window.openModalById = (id) => {
@@ -816,25 +807,105 @@
         if (p) openModal(p);
       };
 
-      // ================= UTILS =================
+      function getButtonHtml(id) {
+        const item = cartItems.find((c) => c.name === id);
+        if (!item) {
+          return `<button class="action-btn-black" onclick="updateItemQty('${id}', 1); event.stopPropagation();">SELECT ITEM</button>`;
+        } else {
+          return `
+            <div class="action-qty-box" onclick="event.stopPropagation();">
+              <div class="qty-btn-rect" onclick="updateItemQty('${id}', -1)">-</div>
+              <div class="qty-val-rect">${item.quantity}</div>
+              <div class="qty-btn-rect" onclick="updateItemQty('${id}', 1)">+</div>
+            </div>`;
+        }
+      }
+
+      window.updateItemQty = (id, delta) => {
+        const product = window.perfumeDB.find((p) => p.id === id);
+        let existing = cartItems.find((c) => c.name === id);
+
+        if (!existing && delta > 0) {
+          cartItems.push({
+            name: id,
+            caption: `${id} - ${product.name}`,
+            img: product.img,
+            brand: product.brand,
+            quantity: 1,
+          });
+          showToast("Added to List");
+        } else if (existing) {
+          existing.quantity += delta;
+          if (existing.quantity <= 0)
+            cartItems = cartItems.filter((c) => c.name !== id);
+        }
+
+        saveCart();
+        updateButtons(id);
+        updateBottomBar();
+      };
+
+      function updateButtons(id) {
+        const html = getButtonHtml(id);
+        ["btn-home-", "btn-grid-"].forEach((prefix) => {
+          const el = document.getElementById(prefix + id);
+          if (el) el.innerHTML = html;
+        });
+        const modalArea = document.getElementById("modal-action-area");
+        if (currentModalProductId === id && modalArea)
+          modalArea.innerHTML = html;
+      }
+
+      // ================= UTILS & EVENTS =================
+      function setupMenu() {
+        document.getElementById("menu-trigger").onclick = () => {
+          document.getElementById("sidebar").classList.add("active");
+          document.getElementById("sidebar-overlay").classList.add("active");
+        };
+        document.getElementById("sidebar-overlay").onclick = () => {
+          document.getElementById("sidebar").classList.remove("active");
+          document.getElementById("sidebar-overlay").classList.remove("active");
+        };
+      }
+
+      function setupModalClose() {
+        document.querySelector(".modal-close").onclick = () => closeModal();
+        document.getElementById("modal").onclick = (e) => {
+          if (e.target.id === "modal") closeModal();
+        };
+      }
+
+      function closeModal() {
+        document.getElementById("modal").classList.remove("open");
+        currentModalProductId = null;
+        // Clean URL
+        const cleanUrl =
+          window.location.protocol +
+          "//" +
+          window.location.host +
+          window.location.pathname;
+        window.history.pushState({ path: cleanUrl }, "", cleanUrl);
+      }
+
       function loadCart() {
         cartItems = JSON.parse(localStorage.getItem("perfumeCart") || "[]");
         updateBottomBar();
       }
       function saveCart() {
         localStorage.setItem("perfumeCart", JSON.stringify(cartItems));
-        updateBottomBar();
       }
+
       function updateBottomBar() {
-        const qty = cartItems.reduce((a, b) => a + b.quantity, 0);
-        const bar = document.getElementById("bottom-bar");
+        const qty = cartItems.reduce((s, i) => s + i.quantity, 0);
+        const badge = document.getElementById("bottom-bar-badge");
         if (qty > 0) {
-          bar.style.display = "flex";
-          document.getElementById("bar-count").textContent = qty;
+          badge.textContent = qty;
+          badge.style.display = "flex";
         } else {
-          bar.style.display = "none";
+          badge.style.display = "none";
         }
       }
+
       function showToast(msg) {
         const t = document.getElementById("toast");
         t.textContent = msg;
@@ -842,29 +913,82 @@
         setTimeout(() => t.classList.remove("show"), 2000);
       }
 
-      // Sidebar & UI Helpers
-      document.querySelector(".modal-close").onclick = () =>
-        document.getElementById("modal").classList.remove("open");
-      document.getElementById("menu-trigger").onclick = () => {
-        document.getElementById("sidebar").classList.add("active");
-        document.getElementById("sidebar-overlay").classList.add("active");
-      };
-      document.getElementById("sidebar-overlay").onclick = () => {
+      function renderSidebarBrands() {
+        const list = document.getElementById("brand-list-container");
+        list.innerHTML = "";
+        FEATURED_BRANDS.forEach((b) => {
+          const div = document.createElement("div");
+          div.className = "brand-item";
+          div.textContent = b.toUpperCase();
+          div.onclick = () => {
+            switchToGrid(b);
+          };
+          list.appendChild(div);
+        });
+      }
+
+      window.handleMenuClick = (key) => {
         document.getElementById("sidebar").classList.remove("active");
         document.getElementById("sidebar-overlay").classList.remove("active");
+        if (key === "Home") {
+          viewMode = "home";
+          document.getElementById("home-view").style.display = "block";
+          document.getElementById("grid-view").style.display = "none";
+        } else {
+          switchToGrid(key);
+        }
       };
-      document
-        .getElementById("search-input")
-        .addEventListener("change", (e) =>
-          loadView("Search:" + e.target.value),
-        );
 
-      function renderSidebar() {
-        const div = document.getElementById("sidebar-brands");
-        div.innerHTML = "";
-        FEATURED_BRANDS.forEach((b) => {
-          div.innerHTML += `<div class="brand-item" onclick="loadView('${b}')">${b}</div>`;
-        });
+      window.switchToGrid = (key) => {
+        viewMode = "grid";
+        document.getElementById("home-view").style.display = "none";
+        document.getElementById("grid-view").style.display = "block";
+
+        let db = window.perfumeDB.filter((p) => parseInt(p.stock) > 0);
+        let title = key;
+
+        if (key === "All") title = "Full Catalog";
+        else if (key.includes("Gender:")) {
+          const g = key.split(":")[1];
+          db = db.filter((p) => p.gender && p.gender.includes(g));
+          title = g + " Selection";
+        } else if (key === "BestSellers") {
+          db = db.filter((p) => p.top == 1);
+          title = "Best Sellers";
+        } else if (key === "New") {
+          db = db.filter((p) => p.new == 1);
+          title = "New Arrivals";
+        } else if (key === "Set") {
+          db = db.filter((p) => p.name.includes("Set"));
+          title = "Gift Sets";
+        } else if (key.includes("Search:")) {
+          const q = key.split(":")[1].toLowerCase();
+          db = db.filter(
+            (p) =>
+              p.name.toLowerCase().includes(q) ||
+              p.brand.toLowerCase().includes(q) ||
+              p.id.toString().includes(q),
+          );
+          title = "Search: " + q;
+        } else {
+          db = db.filter((p) =>
+            p.brand.toLowerCase().includes(key.toLowerCase()),
+          );
+        }
+
+        currentGridData = db;
+        currentPage = 1;
+        document.getElementById("grid-title").textContent = title;
+        renderGridPage();
+        window.scrollTo(0, 0);
+      };
+
+      function setupSearch() {
+        document
+          .getElementById("global-search-input")
+          .addEventListener("change", (e) => {
+            switchToGrid("Search:" + e.target.value);
+          });
       }
     </script>
   </body>
