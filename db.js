@@ -1,5 +1,5 @@
 // ==========================================
-// db.js - 产品数据管理中心
+// db.js - 产品数据管理中心 (去中心化版)
 // ==========================================
 
 // 🔴 请确保这个链接是您“发布到网络”后生成的 CSV 链接
@@ -52,21 +52,23 @@ async function initProductData() {
     if (cachedData) {
       window.perfumeDB = JSON.parse(cachedData);
       runPageLogic();
-      alert("网络较慢，已加载离线数据");
     }
   }
 }
 
 function runPageLogic() {
+  // 触发首页渲染
   if (typeof renderHome === "function") renderHome();
+  // 触发购物车渲染
   if (typeof renderCart === "function") renderCart();
+  // 触发 SKU Deep Linking 检查 (新增)
+  if (typeof checkUrlForSku === "function") checkUrlForSku();
 }
 
 function parseCSV(csvText) {
   const lines = csvText.trim().split("\n");
   if (lines.length < 2) return [];
 
-  // 获取表头并转小写，去空格
   const headers = lines[0]
     .trim()
     .split(",")
@@ -75,7 +77,6 @@ function parseCSV(csvText) {
   return lines
     .slice(1)
     .map((line) => {
-      // 处理 CSV 中的逗号和引号
       const values = [];
       let current = "";
       let inQuote = false;
@@ -92,7 +93,6 @@ function parseCSV(csvText) {
       values.push(current.trim());
 
       const obj = {};
-      // 如果列数不匹配，跳过
       if (values.length < headers.length) return null;
 
       headers.forEach((header, index) => {
