@@ -15,23 +15,19 @@
       :root {
         --header-height: 60px;
         --total-top-spacing: 60px;
-
         --sidebar-width: 300px;
-        --accent-color: #000; /* 商务黑 */
+        --accent-color: #000;
         --bg-color: #f8f8f8;
         --font-main: "Helvetica Neue", Helvetica, Arial, sans-serif;
-
         /* Tag Colors */
         --tag-hot: #d9534f;
         --tag-new: #007bff;
         --tag-sale: #28a745;
       }
-
       * {
         box-sizing: border-box;
         -webkit-tap-highlight-color: transparent;
       }
-
       body {
         margin: 0;
         padding: 0;
@@ -43,7 +39,6 @@
         -webkit-font-smoothing: antialiased;
         overflow-x: hidden;
       }
-
       a {
         text-decoration: none;
         color: inherit;
@@ -95,7 +90,6 @@
           display: inline;
         }
       }
-
       .header-center {
         flex-grow: 1;
         display: flex;
@@ -135,7 +129,6 @@
         opacity: 1;
         visibility: visible;
       }
-
       .sidebar {
         position: fixed;
         top: 0;
@@ -154,7 +147,6 @@
       .sidebar.active {
         transform: translateX(0);
       }
-
       .sidebar-header {
         display: flex;
         border-bottom: 2px solid #ddd;
@@ -209,7 +201,7 @@
         font-weight: bold;
       }
 
-      /* ================= 4. Bottom Nav Bar (Reseller Mode) ================= */
+      /* ================= 4. Bottom Nav Bar ================= */
       .bottom-nav-bar {
         position: fixed;
         bottom: 25px;
@@ -229,7 +221,6 @@
         border: 1px solid rgba(0, 0, 0, 0.03);
         overflow: hidden;
       }
-
       .nav-left {
         width: 45%;
         display: flex;
@@ -239,14 +230,15 @@
         gap: 10px;
         background: #fff;
       }
-
+      .nav-left:active {
+        background: #f0f0f0;
+      }
       .nav-icon-wrap {
         position: relative;
         display: flex;
         align-items: center;
         flex-shrink: 0;
       }
-
       .nav-list-icon {
         width: 28px;
         height: 28px;
@@ -254,7 +246,6 @@
         fill: none;
         stroke-width: 2;
       }
-
       .nav-badge {
         position: absolute;
         top: -6px;
@@ -273,7 +264,6 @@
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
         z-index: 10;
       }
-
       .nav-info-col {
         display: flex;
         flex-direction: column;
@@ -289,12 +279,10 @@
         font-size: 0.7rem;
         color: #888;
       }
-
       .nav-right {
         width: 55%;
         height: 100%;
       }
-
       .checkout-pill-btn {
         width: 100%;
         height: 100%;
@@ -318,7 +306,7 @@
         background-color: #333;
       }
 
-      /* ================= BUTTON STYLES ================= */
+      /* ================= BUTTONS ================= */
       .action-btn-black {
         background: #fff;
         color: #000;
@@ -338,7 +326,6 @@
         background: #000;
         color: #fff;
       }
-
       .action-qty-box {
         display: flex;
         align-items: center;
@@ -489,7 +476,6 @@
       .scroll-arrow-btn.right {
         right: 2px;
       }
-
       .scroll-progress-container {
         width: 60px;
         height: 4px;
@@ -557,7 +543,6 @@
       .badge-sale {
         background: var(--tag-sale);
       }
-
       .scroll-card-title {
         font-size: 0.85rem;
         color: #333;
@@ -695,7 +680,7 @@
         border: 1px solid #000;
       }
 
-      /* ================= Trust Section (White Label) ================= */
+      /* ================= Trust Section ================= */
       .trust-section {
         background: #fff;
         margin-top: 20px;
@@ -830,7 +815,7 @@
         border: 1px solid #cfd8dc;
       }
 
-      /* Toast Message */
+      /* Toast */
       #toast {
         visibility: hidden;
         min-width: 200px;
@@ -882,6 +867,12 @@
         <nav>
           <a class="menu-link" onclick="handleMenuClick('Home')">Home</a>
           <a class="menu-link" onclick="handleMenuClick('All')">View All</a>
+          <a
+            class="menu-link"
+            href="cart.html"
+            style="color: #000; font-weight: bold"
+            >My Selection List 📝</a
+          >
           <a
             class="menu-link"
             onclick="handleMenuClick('Gender:Women')"
@@ -967,10 +958,7 @@
     </div>
 
     <div class="bottom-nav-bar">
-      <div
-        class="nav-left"
-        onclick="showToast('Use +/- on items to manage list')"
-      >
+      <div class="nav-left" onclick="window.location.href = 'cart.html'">
         <div class="nav-icon-wrap">
           <svg
             class="nav-list-icon"
@@ -992,10 +980,9 @@
             0
           </div>
         </div>
-
         <div class="nav-info-col">
           <div id="bottom-bar-text" class="nav-selection-text">0 SELECTED</div>
-          <div class="nav-sub-text">Build your order list</div>
+          <div class="nav-sub-text">Tap to view list</div>
         </div>
       </div>
 
@@ -1043,7 +1030,7 @@
 
     <script src="db.js"></script>
     <script>
-      // ================= Config & State =================
+      // ================= Config =================
       const FEATURED_BRANDS = [
         "Creed",
         "Dior",
@@ -1075,103 +1062,10 @@
       let currentModalProductId = null;
       let dbLoaded = false;
 
-      // ================= Initialization =================
-      document.addEventListener("DOMContentLoaded", () => {
-        loadCart();
-        setupMenu();
-        renderSidebarBrands();
-        setupSearch();
-        setupModalBackdropClosing();
+      // STORAGE KEY - Must match cart.html
+      const STORAGE_KEY = "perfumeSelection";
 
-        const checkDataInterval = setInterval(() => {
-          if (window.perfumeDB && window.perfumeDB.length > 0) {
-            clearInterval(checkDataInterval);
-            dbLoaded = true;
-            renderHome();
-
-            const urlParams = new URLSearchParams(window.location.search);
-            const skuParam = urlParams.get("sku");
-            if (skuParam) {
-              setTimeout(() => openModalById(skuParam), 300);
-            }
-          }
-        }, 50);
-      });
-
-      window.addEventListener("pageshow", function (event) {
-        loadCart();
-        if (dbLoaded) {
-          if (viewMode === "home") renderHome();
-          else renderGridPage();
-        }
-      });
-
-      // ================= Search Helpers & Sidebar (Restored) =================
-      const BRAND_ALIASES = {
-        lv: "Louis Vuitton",
-        "louis vuitton": "Louis Vuitton",
-        louis: "Louis Vuitton",
-        ysl: "Yves Saint Laurent",
-        yves: "Yves Saint Laurent",
-        saint: "Yves Saint Laurent",
-        tf: "Tom Ford",
-        tom: "Tom Ford",
-        ford: "Tom Ford",
-        creed: "Creed",
-        dior: "Dior",
-        chanel: "Chanel",
-        gucci: "Gucci",
-        pdm: "Parfums de Marly",
-        marly: "Parfums de Marly",
-        mfk: "Maison Francis Kurkdjian",
-        kurkdjian: "Maison Francis Kurkdjian",
-        valentino: "Valentino",
-        versace: "Versace",
-        armani: "Giorgio Armani",
-        "giorgio armani": "Giorgio Armani",
-        burberry: "Burberry",
-        lattafa: "Lattafa",
-        kayali: "Kayali",
-        bond: "Bond No. 9",
-        "bond no 9": "Bond No. 9",
-        jpg: "JEAN PAUL GAULTIER",
-      };
-
-      function detectBrandIntent(raw) {
-        const low = raw.toLowerCase().trim();
-        for (const [k, v] of Object.entries(BRAND_ALIASES)) {
-          if (low.includes(k)) return v;
-        }
-        return null;
-      }
-
-      function normalizeAndTokenize(raw) {
-        return raw
-          .toLowerCase()
-          .trim()
-          .split(/\s+/)
-          .filter((t) => t.length > 0);
-      }
-
-      function calculateRelevanceScore(p, tokens) {
-        let score = 0;
-        const s = (p.id + p.name + p.brand).toLowerCase();
-        tokens.forEach((t) => {
-          if (s.includes(t)) score += 10;
-          // Exact ID match boost
-          if (p.id.toLowerCase() === t) score += 50;
-        });
-        return score;
-      }
-
-      function setupSearch() {
-        const input = document.getElementById("global-search-input");
-        input.addEventListener("change", (e) => {
-          const val = e.target.value.trim();
-          if (val) switchToGrid("Search:" + val);
-        });
-      }
-
+      // ================= Define Functions FIRST =================
       function renderSidebarBrands() {
         const list = document.getElementById("brand-list-container");
         if (!list) return;
@@ -1193,15 +1087,13 @@
         list.appendChild(otherDiv);
       }
 
-      // ================= "Selection List" Logic =================
       function loadCart() {
-        cartItems = JSON.parse(
-          localStorage.getItem("perfumeSelection") || "[]",
-        );
+        cartItems = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
         updateBottomBarData();
       }
+
       function saveCart() {
-        localStorage.setItem("perfumeSelection", JSON.stringify(cartItems));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(cartItems));
         updateBottomBarData();
       }
 
@@ -1219,30 +1111,53 @@
           totalQty === 0 ? "NO ITEMS" : `${totalQty} SELECTED`;
       }
 
+      // ================= Initialization =================
+      document.addEventListener("DOMContentLoaded", () => {
+        loadCart();
+        setupMenu();
+        renderSidebarBrands(); // Safe to call now
+        setupSearch();
+        setupModalBackdropClosing();
+
+        const checkDataInterval = setInterval(() => {
+          if (window.perfumeDB && window.perfumeDB.length > 0) {
+            clearInterval(checkDataInterval);
+            dbLoaded = true;
+            renderHome();
+            const urlParams = new URLSearchParams(window.location.search);
+            const skuParam = urlParams.get("sku");
+            if (skuParam) {
+              setTimeout(() => openModalById(skuParam), 300);
+            }
+          }
+        }, 50);
+      });
+
+      window.addEventListener("pageshow", function (event) {
+        loadCart();
+        if (dbLoaded) {
+          if (viewMode === "home") renderHome();
+          else renderGridPage();
+        }
+      });
+
+      // ================= Selection Logic =================
       window.copyListToClipboard = function () {
         if (cartItems.length === 0) return showToast("List is empty");
-
         let msg = `*Order Request List*\n------------------\n`;
         cartItems.forEach((item) => {
           msg += `${item.caption} x ${item.quantity}\n`;
         });
         msg += `------------------\nTotal Items: ${cartItems.reduce((s, i) => s + i.quantity, 0)}\n`;
-
         navigator.clipboard
           .writeText(msg)
           .then(() => {
             showToast("Copied! Send to your seller.");
           })
           .catch((err) => {
-            showToast("Error copying. Please screenshot.");
-            console.error("Copy failed", err);
+            showToast("Error copying.");
           });
       };
-
-      function formatSizeRaw(ml) {
-        if (!ml) return "";
-        return ml.toString().includes("ml") ? ml : ml + "ml";
-      }
 
       window.updateItemQty = function (id, delta) {
         const db = window.perfumeDB;
@@ -1273,6 +1188,7 @@
         }
         saveCart();
 
+        // UI Updates
         const newBtnHtml = getAddButtonHtml(id);
         const scrollBtnWrap = document.getElementById(`btn-wrap-${id}`);
         if (scrollBtnWrap) scrollBtnWrap.innerHTML = newBtnHtml;
@@ -1305,14 +1221,13 @@
         if (container) container.innerHTML = getAddButtonHtml(id);
       }
 
-      // ================= Rendering Logic =================
+      // ================= UI Helpers =================
       function getStockHtml(inventory) {
         if (inventory && !isNaN(inventory) && inventory > 0 && inventory < 50) {
           return `<span class="stock-warning-text">Low Stock: ${inventory}</span>`;
         }
         return "";
       }
-
       function formatSize(item) {
         if (!item.ml) return "";
         if (isNaN(Number(item.ml))) return item.ml;
@@ -1320,7 +1235,6 @@
         const flOz = (ml / 29.57).toFixed(1);
         return `${ml}ml <span style="color:#999;font-weight:normal">(${flOz} oz)</span>`;
       }
-
       function getGenderClass(genderText) {
         if (!genderText) return "unisex";
         const g = genderText.toLowerCase();
@@ -1328,12 +1242,12 @@
         if (g.includes("men") || g.includes("male")) return "men";
         return "unisex";
       }
-
       function generatePictureHTML(src, alt) {
         const webpSrc = src.replace(/\.(jpg|png|jpeg)$/i, ".webp");
         return `<div class="img-wrapper skeleton-loader"><picture><source srcset="${webpSrc}" type="image/webp"><img src="${src}" alt="${alt}" loading="lazy" class="lazy-img" onload="this.classList.add('loaded'); this.parentElement.parentElement.classList.remove('skeleton-loader');" onerror="this.parentElement.parentElement.classList.remove('skeleton-loader');"></picture></div>`;
       }
 
+      // ================= Rendering =================
       function renderHome() {
         const db = (window.perfumeDB || []).filter(
           (p) => parseInt(p.stock) > 0,
@@ -1715,6 +1629,66 @@
         currentModalProductId = null;
       };
 
+      const BRAND_ALIASES = {
+        lv: "Louis Vuitton",
+        "louis vuitton": "Louis Vuitton",
+        louis: "Louis Vuitton",
+        ysl: "Yves Saint Laurent",
+        yves: "Yves Saint Laurent",
+        saint: "Yves Saint Laurent",
+        tf: "Tom Ford",
+        tom: "Tom Ford",
+        ford: "Tom Ford",
+        creed: "Creed",
+        dior: "Dior",
+        chanel: "Chanel",
+        gucci: "Gucci",
+        pdm: "Parfums de Marly",
+        marly: "Parfums de Marly",
+        mfk: "Maison Francis Kurkdjian",
+        kurkdjian: "Maison Francis Kurkdjian",
+        valentino: "Valentino",
+        versace: "Versace",
+        armani: "Giorgio Armani",
+        "giorgio armani": "Giorgio Armani",
+        burberry: "Burberry",
+        lattafa: "Lattafa",
+        kayali: "Kayali",
+        bond: "Bond No. 9",
+        "bond no 9": "Bond No. 9",
+        jpg: "JEAN PAUL GAULTIER",
+      };
+
+      function detectBrandIntent(raw) {
+        const low = raw.toLowerCase().trim();
+        for (const [k, v] of Object.entries(BRAND_ALIASES)) {
+          if (low.includes(k)) return v;
+        }
+        return null;
+      }
+      function normalizeAndTokenize(raw) {
+        return raw
+          .toLowerCase()
+          .trim()
+          .split(/\s+/)
+          .filter((t) => t.length > 0);
+      }
+      function calculateRelevanceScore(p, tokens) {
+        let score = 0;
+        const s = (p.id + p.name + p.brand).toLowerCase();
+        tokens.forEach((t) => {
+          if (s.includes(t)) score += 10;
+          if (p.id.toLowerCase() === t) score += 50;
+        });
+        return score;
+      }
+      function setupSearch() {
+        const input = document.getElementById("global-search-input");
+        input.addEventListener("change", (e) => {
+          const val = e.target.value.trim();
+          if (val) switchToGrid("Search:" + val);
+        });
+      }
       function handleMenuClick(action) {
         document.getElementById("sidebar").classList.remove("active");
         document.getElementById("sidebar-overlay").classList.remove("active");
