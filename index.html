@@ -14,10 +14,10 @@
       /* ================= 1. Global Config & Layout ================= */
       :root {
         --header-height: 60px;
-        --total-top-spacing: 60px; /* 去除Banner后高度调整 */
+        --total-top-spacing: 60px;
 
         --sidebar-width: 300px;
-        --accent-color: #000; /* 改为黑色，更加中性/商务 */
+        --accent-color: #000; /* 商务黑 */
         --bg-color: #f8f8f8;
         --font-main: "Helvetica Neue", Helvetica, Arial, sans-serif;
 
@@ -230,7 +230,6 @@
         overflow: hidden;
       }
 
-      /* Left Side: Count info */
       .nav-left {
         width: 45%;
         display: flex;
@@ -280,8 +279,6 @@
         flex-direction: column;
         justify-content: center;
       }
-
-      /* No Price Shown here */
       .nav-selection-text {
         font-size: 0.85rem;
         font-weight: 700;
@@ -293,7 +290,6 @@
         color: #888;
       }
 
-      /* Right Side: Copy Button */
       .nav-right {
         width: 55%;
         height: 100%;
@@ -302,7 +298,7 @@
       .checkout-pill-btn {
         width: 100%;
         height: 100%;
-        background-color: #000; /* Reseller Black */
+        background-color: #000;
         color: #fff;
         border: none;
         border-radius: 0;
@@ -1071,7 +1067,7 @@
       ];
       const FEATURED_BRANDS_LOWER = FEATURED_BRANDS.map((b) => b.toLowerCase());
 
-      let cartItems = []; // Effectively "Selection List"
+      let cartItems = [];
       let currentPage = 1;
       const itemsPerPage = 20;
       let currentGridData = [];
@@ -1087,18 +1083,15 @@
         setupSearch();
         setupModalBackdropClosing();
 
-        // Load DB and Handle URL Params (Deep Linking)
         const checkDataInterval = setInterval(() => {
           if (window.perfumeDB && window.perfumeDB.length > 0) {
             clearInterval(checkDataInterval);
             dbLoaded = true;
             renderHome();
 
-            // 核心逻辑：检查 URL 是否有 SKU 参数
             const urlParams = new URLSearchParams(window.location.search);
             const skuParam = urlParams.get("sku");
             if (skuParam) {
-              // 延迟一点以确保渲染完成
               setTimeout(() => openModalById(skuParam), 300);
             }
           }
@@ -1112,6 +1105,93 @@
           else renderGridPage();
         }
       });
+
+      // ================= Search Helpers & Sidebar (Restored) =================
+      const BRAND_ALIASES = {
+        lv: "Louis Vuitton",
+        "louis vuitton": "Louis Vuitton",
+        louis: "Louis Vuitton",
+        ysl: "Yves Saint Laurent",
+        yves: "Yves Saint Laurent",
+        saint: "Yves Saint Laurent",
+        tf: "Tom Ford",
+        tom: "Tom Ford",
+        ford: "Tom Ford",
+        creed: "Creed",
+        dior: "Dior",
+        chanel: "Chanel",
+        gucci: "Gucci",
+        pdm: "Parfums de Marly",
+        marly: "Parfums de Marly",
+        mfk: "Maison Francis Kurkdjian",
+        kurkdjian: "Maison Francis Kurkdjian",
+        valentino: "Valentino",
+        versace: "Versace",
+        armani: "Giorgio Armani",
+        "giorgio armani": "Giorgio Armani",
+        burberry: "Burberry",
+        lattafa: "Lattafa",
+        kayali: "Kayali",
+        bond: "Bond No. 9",
+        "bond no 9": "Bond No. 9",
+        jpg: "JEAN PAUL GAULTIER",
+      };
+
+      function detectBrandIntent(raw) {
+        const low = raw.toLowerCase().trim();
+        for (const [k, v] of Object.entries(BRAND_ALIASES)) {
+          if (low.includes(k)) return v;
+        }
+        return null;
+      }
+
+      function normalizeAndTokenize(raw) {
+        return raw
+          .toLowerCase()
+          .trim()
+          .split(/\s+/)
+          .filter((t) => t.length > 0);
+      }
+
+      function calculateRelevanceScore(p, tokens) {
+        let score = 0;
+        const s = (p.id + p.name + p.brand).toLowerCase();
+        tokens.forEach((t) => {
+          if (s.includes(t)) score += 10;
+          // Exact ID match boost
+          if (p.id.toLowerCase() === t) score += 50;
+        });
+        return score;
+      }
+
+      function setupSearch() {
+        const input = document.getElementById("global-search-input");
+        input.addEventListener("change", (e) => {
+          const val = e.target.value.trim();
+          if (val) switchToGrid("Search:" + val);
+        });
+      }
+
+      function renderSidebarBrands() {
+        const list = document.getElementById("brand-list-container");
+        if (!list) return;
+        list.innerHTML = "";
+        FEATURED_BRANDS.forEach((brand) => {
+          const div = document.createElement("div");
+          div.className = "brand-item";
+          div.textContent =
+            brand === "Yves Saint Laurent" ? "YSL" : brand.toUpperCase();
+          div.onclick = () => scrollToBrand(brand);
+          list.appendChild(div);
+        });
+        const otherDiv = document.createElement("div");
+        otherDiv.className = "brand-item";
+        otherDiv.style.cssText =
+          "font-weight: bold; margin-top: 10px; color: #000; border-bottom: none;";
+        otherDiv.textContent = "OTHER BRANDS";
+        otherDiv.onclick = () => scrollToBrand("Other");
+        list.appendChild(otherDiv);
+      }
 
       // ================= "Selection List" Logic =================
       function loadCart() {
@@ -1127,8 +1207,6 @@
 
       function updateBottomBarData() {
         const totalQty = cartItems.reduce((s, i) => s + i.quantity, 0);
-
-        // Update Badge
         const badgeEl = document.getElementById("bottom-bar-badge");
         if (totalQty > 0) {
           badgeEl.textContent = totalQty;
@@ -1136,20 +1214,16 @@
         } else {
           badgeEl.style.display = "none";
         }
-
-        // Update Text (No Prices)
         const textEl = document.getElementById("bottom-bar-text");
         textEl.textContent =
           totalQty === 0 ? "NO ITEMS" : `${totalQty} SELECTED`;
       }
 
-      // 核心功能：复制文本（保持原有格式）
       window.copyListToClipboard = function () {
         if (cartItems.length === 0) return showToast("List is empty");
 
         let msg = `*Order Request List*\n------------------\n`;
         cartItems.forEach((item) => {
-          // 保持你之前的 caption 格式：ID - Name Size
           msg += `${item.caption} x ${item.quantity}\n`;
         });
         msg += `------------------\nTotal Items: ${cartItems.reduce((s, i) => s + i.quantity, 0)}\n`;
@@ -1176,8 +1250,6 @@
         if (!product) return;
 
         let existing = cartItems.find((c) => c.name === id);
-
-        // 生成 caption，保持原有的格式逻辑
         let sizeLabel = product.ml
           ? isNaN(Number(product.ml))
             ? `(${product.ml})`
@@ -1187,8 +1259,8 @@
 
         if (!existing && delta > 0) {
           cartItems.push({
-            name: id, // ID is SKU
-            caption: captionStr, // 严格保持旧的 caption 格式
+            name: id,
+            caption: captionStr,
             brand: product.brand,
             ml: product.ml,
             quantity: 1,
@@ -1201,7 +1273,6 @@
         }
         saveCart();
 
-        // Update UI buttons
         const newBtnHtml = getAddButtonHtml(id);
         const scrollBtnWrap = document.getElementById(`btn-wrap-${id}`);
         if (scrollBtnWrap) scrollBtnWrap.innerHTML = newBtnHtml;
@@ -1263,7 +1334,6 @@
         return `<div class="img-wrapper skeleton-loader"><picture><source srcset="${webpSrc}" type="image/webp"><img src="${src}" alt="${alt}" loading="lazy" class="lazy-img" onload="this.classList.add('loaded'); this.parentElement.parentElement.classList.remove('skeleton-loader');" onerror="this.parentElement.parentElement.classList.remove('skeleton-loader');"></picture></div>`;
       }
 
-      // Render Home
       function renderHome() {
         const db = (window.perfumeDB || []).filter(
           (p) => parseInt(p.stock) > 0,
@@ -1397,7 +1467,6 @@
           wrapper.appendChild(card);
         });
 
-        // Add controls logic (same as before)
         const progressContainer = document.createElement("div");
         progressContainer.className = "scroll-progress-container";
         const progressBar = document.createElement("div");
@@ -1431,7 +1500,6 @@
         return section;
       }
 
-      // Render Grid
       function switchToGrid(criteria) {
         viewMode = "grid";
         document.getElementById("home-view").style.display = "none";
@@ -1531,7 +1599,6 @@
           const stockHtml = getStockHtml(p.inventory);
           const buttonHtml = getAddButtonHtml(p.id);
 
-          // Grid View: Kept details, Removed Price
           div.innerHTML = `
               <div class="item-img-box skeleton-loader" onclick="openModalById('${p.id}')">
                   <picture><source srcset="${webpSrc}" type="image/webp"><img src="${p.img}" loading="lazy" class="lazy-img" onload="this.classList.add('loaded'); this.parentElement.parentElement.classList.remove('skeleton-loader');" onerror="this.parentElement.parentElement.classList.remove('skeleton-loader');"></picture>
@@ -1608,7 +1675,6 @@
         );
       }
 
-      // Modal Logic
       window.openModal = function (product) {
         currentModalProductId = product.id;
         document.getElementById("modal-img").src = product.img;
@@ -1634,7 +1700,6 @@
           stockEl.style.display = "none";
         }
 
-        // PRICE REMOVED HERE
         updateModalButtonState(product.id);
         document.getElementById("modal").classList.add("open");
       };
@@ -1650,65 +1715,6 @@
         currentModalProductId = null;
       };
 
-      // ================= Search Helpers =================
-      const BRAND_ALIASES = {
-        lv: "Louis Vuitton",
-        "louis vuitton": "Louis Vuitton",
-        louis: "Louis Vuitton",
-        ysl: "Yves Saint Laurent",
-        yves: "Yves Saint Laurent",
-        saint: "Yves Saint Laurent",
-        tf: "Tom Ford",
-        tom: "Tom Ford",
-        ford: "Tom Ford",
-        creed: "Creed",
-        dior: "Dior",
-        chanel: "Chanel",
-        gucci: "Gucci",
-        pdm: "Parfums de Marly",
-        marly: "Parfums de Marly",
-        mfk: "Maison Francis Kurkdjian",
-        kurkdjian: "Maison Francis Kurkdjian",
-        valentino: "Valentino",
-        versace: "Versace",
-        armani: "Giorgio Armani",
-        "giorgio armani": "Giorgio Armani",
-        burberry: "Burberry",
-        lattafa: "Lattafa",
-        kayali: "Kayali",
-        bond: "Bond No. 9",
-        "bond no 9": "Bond No. 9",
-        jpg: "JEAN PAUL GAULTIER",
-      };
-      function detectBrandIntent(raw) {
-        const low = raw.toLowerCase().trim();
-        for (const [k, v] of Object.entries(BRAND_ALIASES)) {
-          if (low.includes(k)) return v;
-        }
-        return null;
-      }
-      function normalizeAndTokenize(raw) {
-        return raw
-          .toLowerCase()
-          .trim()
-          .split(/\s+/)
-          .filter((t) => t.length > 0);
-      }
-      function calculateRelevanceScore(p, tokens) {
-        let score = 0;
-        const s = (p.id + p.name + p.brand).toLowerCase();
-        tokens.forEach((t) => {
-          if (s.includes(t)) score += 10;
-        });
-        return score;
-      }
-      function setupSearch() {
-        const input = document.getElementById("global-search-input");
-        input.addEventListener("change", (e) => {
-          const val = e.target.value.trim();
-          if (val) switchToGrid("Search:" + val);
-        });
-      }
       function handleMenuClick(action) {
         document.getElementById("sidebar").classList.remove("active");
         document.getElementById("sidebar-overlay").classList.remove("active");
