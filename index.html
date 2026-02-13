@@ -22,14 +22,12 @@
         --tag-sale: #28a745;
       }
 
-      /* 隐藏价格相关元素 */
+      /* 隐藏不需要的元素 */
       .price-display,
       .discount-badge,
       .old-price,
       #wholesale-banner,
-      .trust-section a {
-        display: none !important;
-      }
+      .trust-section a,
       .header-right {
         display: none !important;
       }
@@ -226,7 +224,7 @@
         text-transform: uppercase;
       }
 
-      /* CARDS */
+      /* HOME & CARDS */
       .brand-section {
         margin-bottom: 15px;
         background: #fff;
@@ -300,7 +298,7 @@
         margin-top: 2px;
       }
 
-      /* BUTTONS */
+      /* BUTTONS (Add to Cart style) */
       .action-btn-black {
         background: #000;
         color: #fff;
@@ -337,7 +335,7 @@
         font-weight: 700;
       }
 
-      /* MODAL - 修复了图片CSS和Note样式 */
+      /* ================= MODAL STYLE (Replicating Image 2) ================= */
       .modal {
         display: none;
         position: fixed;
@@ -355,9 +353,9 @@
         background: #fff;
         width: 100%;
         max-width: 400px;
-        border-radius: 12px;
+        border-radius: 8px;
         overflow: hidden;
-        padding-bottom: 20px;
+        padding-bottom: 25px;
         position: relative;
       }
       .modal-close {
@@ -370,48 +368,122 @@
         width: 40px;
         height: 40px;
         text-align: center;
-        line-height: 40px;
+        line-height: 35px;
+        color: #333;
       }
 
-      /* 图片修复：加回灰色背景和Object-fit */
+      /* Image Area */
       .modal-img {
         width: 100%;
-        height: 300px;
-        object-fit: contain;
-        background: #f9f9f9;
-        margin-bottom: 10px;
+        height: 320px;
+        object-fit: cover;
+        background: #f4f4f4; /* Light gray bg for image */
       }
 
       .modal-info {
-        padding: 0 20px;
+        padding: 0 25px;
         text-align: center;
       }
-      .modal-notes-box {
-        font-size: 0.9rem;
-        color: #555;
-        background: #f4f4f4;
-        padding: 8px 12px;
-        border-radius: 6px;
-        margin: 10px 0;
-        font-style: italic;
-        line-height: 1.4;
+
+      /* Brand & Gender Line */
+      .modal-brand-line {
+        color: #888;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-top: 15px;
+        margin-bottom: 5px;
+        font-weight: 500;
       }
 
-      .stock-status {
-        display: inline-block;
-        padding: 5px 10px;
-        border-radius: 4px;
-        font-size: 0.9rem;
-        font-weight: bold;
-        margin: 10px 0;
+      /* Product Title */
+      .modal-title-text {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #222;
+        margin: 0 0 10px 0;
+        line-height: 1.2;
       }
-      .stock-green {
-        background: #e8f5e9;
+
+      /* SKU Badge */
+      .modal-sku-badge {
+        font-family: monospace;
+        color: #555;
+        background: #f0f0f0;
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        margin-bottom: 15px;
+        letter-spacing: 1px;
+      }
+
+      /* Fragrance Notes Box (The Gray Box) */
+      .modal-notes-box {
+        background-color: #f5f5f5;
+        border-radius: 6px;
+        padding: 12px 15px;
+        margin: 10px 0 20px 0;
+        color: #555;
+        font-size: 0.95rem;
+        font-style: italic;
+        line-height: 1.5;
+      }
+
+      /* Stock Badge (The Pink Box) */
+      .stock-badge {
+        display: inline-block;
+        padding: 6px 15px;
+        border-radius: 4px;
+        font-size: 0.95rem;
+        font-weight: bold;
+        margin-bottom: 15px;
+      }
+      .stock-low {
+        background-color: #ffeaea; /* Pink background */
+        color: #d32f2f; /* Red text */
+      }
+      .stock-ok {
+        background-color: #e8f5e9;
         color: #2e7d32;
       }
-      .stock-red {
-        background: #ffebee;
-        color: #c62828;
+
+      /* Action Button (The Black Button) */
+      .modal-action-btn {
+        width: 100%;
+        background-color: #000;
+        color: #fff;
+        padding: 15px 0;
+        font-size: 1rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        border-radius: 6px;
+        cursor: pointer;
+        border: none;
+      }
+      .modal-qty-ui {
+        display: flex;
+        height: 50px;
+        border: 2px solid #000;
+        border-radius: 6px;
+        overflow: hidden;
+      }
+      .modal-qty-btn {
+        width: 50px;
+        background: #000;
+        color: #fff;
+        font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .modal-qty-val {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        font-weight: bold;
       }
 
       /* GRID VIEW */
@@ -546,42 +618,21 @@
     <div id="modal" class="modal">
       <div class="modal-content">
         <div class="modal-close">&times;</div>
-        <img id="modal-img" class="modal-img" src="" />
-        <div class="modal-info">
-          <div
-            id="modal-sub"
-            style="
-              color: #888;
-              font-size: 0.85rem;
-              letter-spacing: 1px;
-              text-transform: uppercase;
-            "
-          ></div>
-          <h3
-            id="modal-title"
-            style="margin: 5px 0 10px; font-size: 1.2rem"
-          ></h3>
-          <div
-            id="modal-sku"
-            style="
-              font-family: monospace;
-              color: #555;
-              background: #f0f0f0;
-              display: inline-block;
-              padding: 2px 6px;
-              border-radius: 4px;
-              font-size: 0.8rem;
-            "
-          ></div>
 
-          <div
-            id="modal-notes"
-            class="modal-notes-box"
-            style="display: none"
-          ></div>
+        <img id="modal-img" class="modal-img" src="" />
+
+        <div class="modal-info">
+          <div id="modal-brand-line" class="modal-brand-line"></div>
+
+          <h3 id="modal-title" class="modal-title-text"></h3>
+
+          <div id="modal-sku" class="modal-sku-badge"></div>
+
+          <div id="modal-notes" class="modal-notes-box"></div>
 
           <div id="modal-stock"></div>
-          <div id="modal-action-area" style="margin-top: 15px"></div>
+
+          <div id="modal-action-area" style="margin-top: 10px"></div>
         </div>
       </div>
     </div>
@@ -654,6 +705,7 @@
 
       // ================= RENDER LOGIC =================
       function renderHome() {
+        // Use logic: Show item if stock (availability) is not 0
         const db = (window.perfumeDB || []).filter(
           (p) => parseInt(p.stock) > 0,
         );
@@ -780,28 +832,36 @@
       window.openModal = (p) => {
         currentModalProductId = p.id;
         document.getElementById("modal-img").src = p.img;
+
+        // Brand & Gender Line: e.g. "MAISON FRANCIS KURKDJIAN · UNISEX"
+        document.getElementById("modal-brand-line").textContent =
+          `${p.brand.toUpperCase()} · ${(p.gender || "UNISEX").toUpperCase()}`;
+
         document.getElementById("modal-title").textContent = p.name;
-        document.getElementById("modal-sub").textContent =
-          p.brand + " · " + (p.gender || "Unisex");
         document.getElementById("modal-sku").textContent = "SKU: " + p.id;
 
-        // 修复香味：同时查找大小写
+        // Notes Logic
         const notes = p.Notes || p.notes || "";
         const notesEl = document.getElementById("modal-notes");
         if (notes) {
-          notesEl.textContent = "Fragrance Notes: " + notes;
+          notesEl.innerHTML = `Fragrance Notes: ${notes}`;
           notesEl.style.display = "block";
         } else {
           notesEl.style.display = "none";
         }
 
-        // 库存逻辑修复
+        // 库存显示逻辑修正 (Use INVENTORY for numbers)
         const stockEl = document.getElementById("modal-stock");
-        const stockNum = parseInt(p.inventory || p.stock); // 确保是数字
-        if (stockNum < 10) {
-          stockEl.innerHTML = `<div class="stock-status stock-red">Low Stock: ${stockNum} Left</div>`;
+        // 如果 CSV 里没有 inventory 字段，就默认为 0
+        const inventoryNum =
+          p.inventory !== undefined ? parseInt(p.inventory) : 0;
+
+        if (inventoryNum < 10 && inventoryNum > 0) {
+          stockEl.innerHTML = `<div class="stock-badge stock-low">Low Stock: ${inventoryNum} Left</div>`;
+        } else if (inventoryNum >= 10) {
+          stockEl.innerHTML = `<div class="stock-badge stock-ok">In Stock</div>`;
         } else {
-          stockEl.innerHTML = `<div class="stock-status stock-green">In Stock</div>`;
+          stockEl.innerHTML = `<div class="stock-badge" style="background:#eee;color:#999">Out of Stock</div>`;
         }
 
         updateButtons(p.id);
@@ -822,17 +882,33 @@
         if (p) openModal(p);
       };
 
-      function getButtonHtml(id) {
+      function getButtonHtml(id, isModal = false) {
         const item = cartItems.find((c) => c.name === id);
-        if (!item) {
-          return `<button class="action-btn-black" onclick="updateItemQty('${id}', 1); event.stopPropagation();">SELECT ITEM</button>`;
+
+        if (isModal) {
+          // Modal Style: Big Black Button or Big Counter
+          if (!item) {
+            return `<button class="modal-action-btn" onclick="updateItemQty('${id}', 1); event.stopPropagation();">SELECT ITEM</button>`;
+          } else {
+            return `
+                <div class="modal-qty-ui" onclick="event.stopPropagation();">
+                  <div class="modal-qty-btn" onclick="updateItemQty('${id}', -1)">-</div>
+                  <div class="modal-qty-val">${item.quantity}</div>
+                  <div class="modal-qty-btn" onclick="updateItemQty('${id}', 1)">+</div>
+                </div>`;
+          }
         } else {
-          return `
-            <div class="action-qty-box" onclick="event.stopPropagation();">
-              <div class="qty-btn-rect" onclick="updateItemQty('${id}', -1)">-</div>
-              <div class="qty-val-rect">${item.quantity}</div>
-              <div class="qty-btn-rect" onclick="updateItemQty('${id}', 1)">+</div>
-            </div>`;
+          // Card Style: Small Button
+          if (!item) {
+            return `<button class="action-btn-black" onclick="updateItemQty('${id}', 1); event.stopPropagation();">SELECT ITEM</button>`;
+          } else {
+            return `
+                <div class="action-qty-box" onclick="event.stopPropagation();">
+                  <div class="qty-btn-rect" onclick="updateItemQty('${id}', -1)">-</div>
+                  <div class="qty-val-rect">${item.quantity}</div>
+                  <div class="qty-btn-rect" onclick="updateItemQty('${id}', 1)">+</div>
+                </div>`;
+          }
         }
       }
 
@@ -861,14 +937,17 @@
       };
 
       function updateButtons(id) {
-        const html = getButtonHtml(id);
+        // Update Grid/Home buttons
         ["btn-home-", "btn-grid-"].forEach((prefix) => {
           const el = document.getElementById(prefix + id);
-          if (el) el.innerHTML = html;
+          if (el) el.innerHTML = getButtonHtml(id, false);
         });
+
+        // Update Modal button
         const modalArea = document.getElementById("modal-action-area");
-        if (currentModalProductId === id && modalArea)
-          modalArea.innerHTML = html;
+        if (currentModalProductId === id && modalArea) {
+          modalArea.innerHTML = getButtonHtml(id, true);
+        }
       }
 
       // ================= UTILS & EVENTS =================
