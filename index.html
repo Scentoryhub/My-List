@@ -9,12 +9,12 @@
     <title>Catalog</title>
     <link rel="icon" type="image/png" href="icon/32.png" />
     <style>
-      /* ================= 1. Global Config (保留原UI) ================= */
+      /* ================= 1. Global Config ================= */
       :root {
         --header-height: 60px;
         --total-top-spacing: 60px;
         --sidebar-width: 300px;
-        --accent-color: #000; /* 改为黑色，显得更专业/中性 */
+        --accent-color: #000;
         --bg-color: #f8f8f8;
         --font-main: "Helvetica Neue", Helvetica, Arial, sans-serif;
         --tag-hot: #d9534f;
@@ -22,7 +22,7 @@
         --tag-sale: #28a745;
       }
 
-      /* 核心修改：强制隐藏价格相关元素 */
+      /* 隐藏价格相关元素 */
       .price-display,
       .discount-badge,
       .old-price,
@@ -30,7 +30,6 @@
       .trust-section a {
         display: none !important;
       }
-      /* 隐藏 Header 右侧的 Track 按钮 */
       .header-right {
         display: none !important;
       }
@@ -170,7 +169,7 @@
         border-bottom: 1px solid #f0f0f0;
       }
 
-      /* BOTTOM NAV (Capsule) */
+      /* BOTTOM NAV */
       .bottom-nav-bar {
         position: fixed;
         bottom: 25px;
@@ -227,7 +226,7 @@
         text-transform: uppercase;
       }
 
-      /* CARDS & LAYOUT */
+      /* CARDS */
       .brand-section {
         margin-bottom: 15px;
         background: #fff;
@@ -338,7 +337,7 @@
         font-weight: 700;
       }
 
-      /* MODAL */
+      /* MODAL - 修复了图片CSS和Note样式 */
       .modal {
         display: none;
         position: fixed;
@@ -358,7 +357,7 @@
         max-width: 400px;
         border-radius: 12px;
         overflow: hidden;
-        padding-bottom: 15px;
+        padding-bottom: 20px;
         position: relative;
       }
       .modal-close {
@@ -373,21 +372,36 @@
         text-align: center;
         line-height: 40px;
       }
+
+      /* 图片修复：加回灰色背景和Object-fit */
       .modal-img {
         width: 100%;
         height: 300px;
         object-fit: contain;
-        background: #fff;
+        background: #f9f9f9;
+        margin-bottom: 10px;
       }
+
       .modal-info {
-        padding: 15px;
+        padding: 0 20px;
         text-align: center;
       }
+      .modal-notes-box {
+        font-size: 0.9rem;
+        color: #555;
+        background: #f4f4f4;
+        padding: 8px 12px;
+        border-radius: 6px;
+        margin: 10px 0;
+        font-style: italic;
+        line-height: 1.4;
+      }
+
       .stock-status {
         display: inline-block;
-        padding: 4px 8px;
+        padding: 5px 10px;
         border-radius: 4px;
-        font-size: 0.8rem;
+        font-size: 0.9rem;
         font-weight: bold;
         margin: 10px 0;
       }
@@ -419,7 +433,6 @@
         border: 1px solid #eee;
       }
 
-      /* Toast */
       #toast {
         visibility: hidden;
         min-width: 200px;
@@ -560,15 +573,13 @@
               font-size: 0.8rem;
             "
           ></div>
+
           <div
             id="modal-notes"
-            style="
-              font-size: 0.9rem;
-              color: #666;
-              margin: 10px 0;
-              font-style: italic;
-            "
+            class="modal-notes-box"
+            style="display: none"
           ></div>
+
           <div id="modal-stock"></div>
           <div id="modal-action-area" style="margin-top: 15px"></div>
         </div>
@@ -627,12 +638,11 @@
         setupModalClose();
       });
 
-      // ================= URL SKU LOGIC (关键新增) =================
+      // ================= URL SKU LOGIC =================
       window.checkSkuParam = function () {
         const urlParams = new URLSearchParams(window.location.search);
         const sku = urlParams.get("sku");
         if (sku && window.perfumeDB) {
-          // 查找 ID 匹配 或 名称开头匹配
           const product = window.perfumeDB.find(
             (p) => p.id == sku || (p.id + "-" + p.name).startsWith(sku),
           );
@@ -650,7 +660,6 @@
         const container = document.getElementById("home-content");
         container.innerHTML = "";
 
-        // Helper to create scroll sections
         const createSection = (title, items, filterKey) => {
           const section = document.createElement("div");
           section.className = "brand-section";
@@ -700,7 +709,6 @@
           container.appendChild(section);
         };
 
-        // 1. Render Categories (保持原有逻辑)
         const best = db.filter((p) => p.top == 1);
         if (best.length) createSection("🔥 Best Sellers", best, "BestSellers");
 
@@ -724,7 +732,6 @@
         const gallery = document.getElementById("gallery");
         gallery.innerHTML = "";
 
-        // Pagination logic... (Simplified for brevity, same as before)
         const start = (currentPage - 1) * 20;
         const items = currentGridData.slice(start, start + 20);
 
@@ -746,7 +753,6 @@
           gallery.appendChild(div);
         });
 
-        // Simple Pagination Controls
         const totalPages = Math.ceil(currentGridData.length / 20);
         const controls = document.getElementById("pagination-controls");
         if (totalPages > 1) {
@@ -778,12 +784,22 @@
         document.getElementById("modal-sub").textContent =
           p.brand + " · " + (p.gender || "Unisex");
         document.getElementById("modal-sku").textContent = "SKU: " + p.id;
-        document.getElementById("modal-notes").textContent = p.Notes || "";
 
-        // Stock Logic (No Price)
+        // 修复香味：同时查找大小写
+        const notes = p.Notes || p.notes || "";
+        const notesEl = document.getElementById("modal-notes");
+        if (notes) {
+          notesEl.textContent = "Fragrance Notes: " + notes;
+          notesEl.style.display = "block";
+        } else {
+          notesEl.style.display = "none";
+        }
+
+        // 库存逻辑修复
         const stockEl = document.getElementById("modal-stock");
-        if (p.inventory < 10) {
-          stockEl.innerHTML = `<div class="stock-status stock-red">Low Stock: ${p.inventory} Left</div>`;
+        const stockNum = parseInt(p.inventory || p.stock); // 确保是数字
+        if (stockNum < 10) {
+          stockEl.innerHTML = `<div class="stock-status stock-red">Low Stock: ${stockNum} Left</div>`;
         } else {
           stockEl.innerHTML = `<div class="stock-status stock-green">In Stock</div>`;
         }
@@ -791,7 +807,6 @@
         updateButtons(p.id);
         document.getElementById("modal").classList.add("open");
 
-        // Update URL to include SKU without reloading (Deep Link sharing)
         const newUrl =
           window.location.protocol +
           "//" +
@@ -878,7 +893,6 @@
       function closeModal() {
         document.getElementById("modal").classList.remove("open");
         currentModalProductId = null;
-        // Clean URL
         const cleanUrl =
           window.location.protocol +
           "//" +
