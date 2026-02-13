@@ -552,6 +552,8 @@
         line-height: 1.2;
         font-weight: 500;
       }
+
+      /* FIXED: Removed margin-left:auto to force left align */
       .scroll-card-info {
         font-size: 0.85rem;
         color: #666;
@@ -560,6 +562,7 @@
         flex-wrap: wrap;
         min-height: 25px;
       }
+
       .stock-warning-text {
         font-size: 0.7rem;
         color: #d9534f;
@@ -1175,7 +1178,7 @@
           cartItems.push({
             name: id,
             caption: captionStr,
-            img: product.img, // CRITICAL FIX: Save Image to Cart Data
+            img: product.img, // Correctly saving image now
             brand: product.brand,
             ml: product.ml,
             quantity: 1,
@@ -1373,7 +1376,7 @@
                 </div>
                 <div class="scroll-card-info">
                    ${stockHtml}
-                   <span style="font-size:0.75rem; color:#666; margin-left:auto;">${p.ml ? formatSize(p) : ""}</span>
+                   <span style="font-size:0.75rem; color:#666;">${p.ml ? formatSize(p) : ""}</span>
                 </div>
                 <div class="btn-qty-wrapper" id="btn-wrap-${p.id}">${buttonHtml}</div>
             </div>
@@ -1658,7 +1661,6 @@
         "bond no 9": "Bond No. 9",
         jpg: "JEAN PAUL GAULTIER",
       };
-
       function detectBrandIntent(raw) {
         const low = raw.toLowerCase().trim();
         for (const [k, v] of Object.entries(BRAND_ALIASES)) {
@@ -1678,7 +1680,6 @@
         const s = (p.id + p.name + p.brand).toLowerCase();
         tokens.forEach((t) => {
           if (s.includes(t)) score += 10;
-          if (p.id.toLowerCase() === t) score += 50;
         });
         return score;
       }
